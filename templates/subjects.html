@@ -1,0 +1,565 @@
+{% include 'header.html' %}
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+    <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"/>
+
+    
+<head>
+   <meta charset="UTF-8">
+   <title>你好</title>
+   
+   <style>
+       
+       .user {
+           float: right;
+           margin-right: 10px;
+       }
+       .user>a {
+           margin-right: 10px;
+       }
+       
+   </style>
+</head>
+<body>
+   <div id="container">
+       <div class="user">
+           <a href="/login">用户登录</a>
+           <a href="/register">快速注册</a>
+       </div>
+       <h1 class="ui header">
+           <i class="chart bar outline icon"></i>
+           <div class="content">广告数据分析</div>
+       </h1>
+       <!-- <hr>
+       <div id="main">
+        <a href='/upload/' class="click" >上传文件</a>
+       </div> -->
+       <div class="ui large inverted item menu">
+           <div class="ui container">
+               <a href="/" class="item">首页</a>
+           </div>
+
+           <div class="ui container">
+            <a href="/help" class="item">帮助</a>
+        </div>
+       </div>
+<!-- 筛选部分 -->
+    <div id="pusher" class="pusher" style="padding-top:0px">
+        <div class="ui celled grid">
+            <div class="class three wide column">
+                
+            <div class="ui container">
+                <div class="ui form">
+                    <form action="" method="post">
+                {% csrf_token %} 
+                <h3 class="ui header" id="analysis">分析维度</h3>
+                <div class="field">
+                    <div class="fields">
+                        <div class="sixteen wide field">
+                            <select name="DIMENSION_select" id="DIMENSION_select" class="ui fluid search dropdown">
+                                {% for key,value in mselect_dict.items %}
+                                    {% if value.select == 'start_date' %}
+                                        <option value="{{ value.select }}" selected>{{ key }}</option>
+                                    {% else %}
+                                        <option value="{{ value.select }}">{{ key }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>                
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            <select name="UNIT_select" id="UNIT_select" class="ui fluid search dropdown">
+                                <option value="all" selected>分级</option>
+                                <option value="level_a">A</option>
+                                <option value="level_b">B</option>
+                                <option value="level_c">C</option>
+                                <option value="level_d">D</option>
+                            </select>
+                        </div>
+                        <div class="eight wide field">
+                            <select name="PERIOD_select" id="PERIOD_select" class="ui fluid search dropdown">
+                                <option value="all" >全周期</option>
+                                <option value="short" selected>最近两周</option>
+                                <option value="medium">两月以内(不包括两周)</option>
+                                <option value="long">两月以上</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="ui header" id="data_filter">数据筛选</h3>
+                <div class="field">
+                    {% for key,value in mselect_dict.items %}
+                    <div class="field">
+                        <select name="{{ value.select|add:'_select[]'}}" id="{{ value.select|add:'_select'}}" multiple=""
+                        class="ui fluid search dropdown">
+                    <option value="">{{key}}</option>
+                    {% for item in value.options %}
+                        <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                    </select>
+                    </div>
+                    {% endfor %}
+                </div>
+                    <br>
+                    <br>
+            <div class="ui buttons">
+                <input class="ui blue button" type='button' id='AJAX_get' value="查询"/>
+            </div>
+
+                </form>
+                
+                </div>
+                
+            </div>
+            </div>
+            
+
+
+            
+
+
+        <div class="thirteen wide column">
+            <div class="ui pointing menu">
+                <div class="ui active dimmer" id="dimmer">
+                    <div class="ui text" style="color: #FFFFFF">
+                        <p>请使用左侧筛选框选择分析维度和定义市场</p>
+                        <p>注意：全周期条件下带来负载较大，分级不可用</p></div>
+                </div>
+                <a class="item active" data-tab="total">
+                    总览
+                </a>
+                <a class="item" data-tab="tendency">
+                    趋势
+                </a>
+                <a class="item" data-tab="rel_grade">分级</a>
+                <a class="item" data-tab="grade">数据透视 </a>
+                <a class="item" data-tab="database">上传数据到数据库 </a>
+              
+              <div class="right menu">
+                  <div class="green item">
+                      <div class="ui transparent icon input">
+                        <div class="ui right icon input">
+                            <input type="text" placeholder="搜索...">
+                            <i class="search icon"></i>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+        
+      <div class="ui tab segment active" data-tab="total">
+          <h3 class="ui header">
+              <div class="content">
+                  当前市场表现
+                  <div class="sub header">KPI</div>
+              </div>
+          </h3>
+          <div class="class ui divider"></div>
+
+          <!-- 统计样式 statistics -->
+          <div class="class ui small three statistics">
+              <div class="statistic">
+                  <div class="value" id="value_amount">{{ data_total_amount }}
+                  </div>
+                  <div class="label" >广告数据总数</div>
+              </div>
+              <div class="green statistic">
+                  <div class="value" id="value_cost">
+                      {{ data_total_cost }}
+                      <i class="dollar sign icon"></i>
+                  </div>
+                  <div class="label">
+                      广告总成本
+                  </div>
+              </div>
+              <div class="red statistic">
+                  <div class="value" id="value_sell">
+                      {{ data_total_sell |safe}}
+                    
+                      <i class=" dollar sign icon"></i>
+                  </div>
+                  
+                  <div class="label">总销售额</div>
+              </div>
+
+              <div id="main1" style="width: 1000px;height: 600px;"></div>
+
+
+
+          </div>
+      </div>
+
+      <div class="ui tab segment" data-tab="tendency">
+          <h3 class="ui header">
+              <div class="content">趋势线与预测</div>
+              <div class="sub header">线性统计</div>
+          </h3>
+          <div class="class ui divider"></div>
+
+          <div id="main" style="width: 1000px;height: 600px;"></div>
+
+      </div>
+
+      <div class="ui tab segment" data-tab="rel_grade">
+        <h3 class="ui header">
+            <div class="content">广告分级</div>
+        </h3>
+        <div class="ui divider"></div>
+
+        <div class="page-container">
+            <form  id="upload_form" action="/upload2/" method="POST"enctype="multipart/form-data">
+                {% csrf_token %}
+                <i class="folder open icon"></i>
+                <input id="upload" type="file" style="width: 50%" name="my_file" id="filename">
+                <!-- <button class="btn" type="button" onclick="Upload()">提交</button> -->
+                  <button class="ui positive right labeled icon button" onclick="Upload()">
+                    <i class="right arrow icon"></i>
+                    提交
+                  </button>
+            </form>
+        </div>
+        
+    </div>
+    
+        <div class="ui tab segment" data-tab="grade">
+            <h3 class="ui header">
+                <div class="content">数据透视</div>
+                
+            </h3>
+            <div>
+                <a class="item" data-tab="export"><i class="download icon"></i>导出数据</a>
+                <button class="fluid ui button" id="export">
+                    <i class="paper plane icon"></i>
+                    <a href="../static/demo.xlsx" download="广告分级.xlsx">点击下载</a>
+                  </button>
+            </div>
+
+            <div class="ui divider"></div>
+            <div class="ui container" id='result_table' style="width: 100%; overflow-x: scroll; overflow-y: hidden;">
+                <!-- Django渲染html代码时需要加入|safe，保证html不会被自动转义 -->
+                {{ ptable|safe }}
+            </div>
+        </div>
+
+
+        <div class="ui tab segment" data-tab="database">
+            <h3 class="ui header">
+                <div class="content">数据存档</div>
+            </h3>
+            <div class="ui divider"></div>
+            
+            <div class="page-container">
+                <form  id="upload_form" action="/upload1/" method="POST"enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <i class="folder open icon"></i>
+                    <input id="upload1" type="file" style="width: 50%" name="my_file" id="filename">
+                    <!-- <button class="btn" type="button" onclick="Upload()">提交</button> -->
+                      <button id="test" class="ui positive right labeled icon button" onclick="Upload1()">
+                        <i class="right arrow icon"></i>
+                        提交
+                      </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="ui tab segment" data-tab="export">
+            <div class="ui buttons">
+                <input class="ui blue button" type='button' id='export_pivot' value="导出整理后时间序列数据"/>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+   </div>
+    </body>
+
+
+
+    <!-- js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/semantic.min.js' %}"></script>
+    <script src="{% static 'js/datatables.js' %}"></script>
+    <script src="{% static 'js/datatables.min.js' %}"></script>
+    <script src="{% static 'js/echarts.js' %}"></script>
+
+
+
+
+
+
+
+<script>
+    $('.pointing.menu .item').tab();
+</script>
+<script>
+    $('.ui.fluid.search.dropdown')
+        .dropdown({ fullTextSearch: true });
+</script>
+
+
+
+
+<script>
+    function initTable(table) {
+        table.DataTable(
+            {
+            }
+        );
+    }
+</script>
+
+<script>
+    function Upload() {
+        $("#test").css({'background-color' : 'gray'});
+        var fileInput = $('#upload').get(0).files[0];
+        console.info(fileInput);
+        if (fileInput) {
+            $("#upload_form").submit();
+        } else {
+            alert("请选择上传文件！");
+        }
+    }
+    </script>
+
+<script>
+    function Upload1() {
+        $("#test").css({'background-color' : 'gray'});
+        var fileInput = $('#upload1').get(0).files[0];
+        console.info(fileInput);
+        if (fileInput) {
+            $("#upload_form").submit();
+        } else {
+            alert("请选择上传文件！");
+        }
+    }
+    </script>
+
+<script>
+    function getForm(){
+        // 获取单选下拉框的值
+        var form_data = {
+            "DIMENSION_select": $("#DIMENSION_select").val(),
+            "PERIOD_select": $("#PERIOD_select").val(),
+            "UNIT_select": $("#UNIT_select").val(),
+        };
+
+        //获取多选下拉框的值
+        var dict = {{ mselect_dict|safe }};
+        for (key in dict) {
+            var form_name = dict[key]['select'] + "_select";
+            jquery_selector_id = "[id='" + form_name + "']";//因为我们的部分多选框id有空格，要用这种写法
+            form_data[form_name] = $(jquery_selector_id).val();
+        }
+
+        return form_data
+    }
+</script>
+
+
+
+<script>
+    $("#export").click(function(){
+        var form_data = getForm();
+
+        var downloadUrl = '{% url 'export' %}' + '?' + $.param(form_data);
+        window.location.href = downloadUrl;
+    })
+
+
+</script>
+
+
+<script type="text/javascript">
+    $("#AJAX_get").click(function (event) {
+
+        var dimmer = $("#dimmer");
+        dimmer.attr('class','ui active dimmer');
+        dimmer.children('div').remove();
+        dimmer.append('<div class="ui text loader">数据加载中，喝口水等一下......</div>');
+        
+        
+        event.preventDefault(); // 防止表单默认的提交
+        
+        var form_data = getForm()
+
+        $.ajax({
+            // 请求的url
+            url: '{% url 'query' %}',
+            // 请求的type
+            type: 'GET',
+            // 发送的数据
+            data: form_data,
+            // 回调函数，其中ret是返回的JSON，可以以字典的方式调用
+            success: function (ret) {     //成功执行
+                //去除加载遮罩
+                dimmer.attr('class','ui dimmer');
+                 // 更新单位标签
+                // 把查询结果输出到网页上预留id的DOM元素中
+                $("#value_amount").html(ret["data_total_amount"].toLocaleString());
+                $("#value_cost").html(ret["data_total_cost"].toLocaleString());
+                $("#value_sell").html(ret["data_total_sell"].toLocaleString());
+                $("#result_table").html(ret['ptable']);
+                initTable($("#ptable"))
+                
+                var data_search_ctr = ret['data_search_ctr']
+                var data_search_cr = ret['data_search_cr']
+                var data_search_hits = ret['data_search_hits']
+                var data_search_date = ret['data_search_date']
+                var nightingal = ret['nightingal']
+
+                console.log(data_search_date)
+                console.log(data_search_ctr)
+                console.log(nightingal)
+                var chartDom = document.getElementById('main');
+                var myChart = echarts.init(chartDom);
+                var option;
+
+                option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                    type: 'cross',
+                    crossStyle: {
+                        color: '#999'
+                    }
+                    }
+                },
+                toolbox: {
+                    feature: {
+                    dataView: { show: true, readOnly: false },
+                    magicType: { show: true, type: ['line', 'bar'] },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                    }
+                },
+                legend: {
+                    data: ['click on quantity', 'click rate', 'conversion rate']
+                },
+                xAxis: [
+                {
+                    type: 'category',
+                    data: data_search_date,
+                    axisPointer: {
+                                    type: 'shadow'
+                                 }
+                }
+                ],
+                yAxis: [
+                    {
+                    type: 'value',
+                    name: 'click on quantity',
+                    min: 0,
+                    max: 25,
+                    interval: 25,
+                    axisLabel: {
+                        formatter: '{value} tims'
+                    }
+                    },
+                    {
+                    type: 'value',
+                    name: 'click rate',
+                    min: 0,
+                    max: 1,
+                    interval: 0.25,
+                    axisLabel: {
+                        formatter: '{value} '
+                    }
+                    }
+                ],
+                series: [
+                    {
+                    name: 'click on quantity',
+                    type: 'bar',
+                    tooltip: {
+                        valueFormatter: function (value) {
+                        return value + ' times';
+                        }
+                    },
+                    data: data_search_hits
+                    },
+                    {
+                    name: 'click rate',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    tooltip: {
+                        valueFormatter: function (value) {
+                        return value + '';
+                        }
+                    },
+                    data: data_search_ctr
+                    },
+                    {
+                    name: 'conversion rate',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    tooltip: {
+                        valueFormatter: function (value) {
+                        return value + '';
+                        }
+                    },
+                    data: data_search_cr
+                    }
+                ]
+                };
+
+                option && myChart.setOption(option);
+// =====================================================================================================================
+                var chartDom = document.getElementById('main1');
+                var myChart = echarts.init(chartDom);
+                var option1;
+
+                option1 = {
+
+                    title: {
+                    text: '销量前五搜索词'
+                },
+                legend: {
+                    top: 'bottom'
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                    mark: { show: true },
+                    dataView: { show: true, readOnly: false },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                    }
+                },
+                series: [
+                    {
+                    name: 'Nightingale Chart',
+                    type: 'pie',
+                    radius: [50, 250],
+                    center: ['50%', '50%'],
+                    roseType: 'area',
+                    itemStyle: {
+                        borderRadius: 8
+                    },
+                    data: nightingal
+                    }
+                ]
+                };
+
+                option1 && myChart.setOption(option1);
+
+
+
+
+
+
+            },
+            error: function () {            //失败
+                console.log('失败')
+                dimmer.children('div').text('有错误发生，查询失败');
+            }
+        });
+    })
+</script>
+</html>

@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+    <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables.min.css' %}">
+<style>
+    #live2dcanvas {
+      border: 0 !important;
+  }
+</style>
+    
+<head>
+   <meta charset="UTF-8">
+   <title>帮助文档</title>
+</head>
+
+<body>
+
+    <h1 class="ui center aligned header">数据划分标准</h1>
+    
+    
+    <table class="ui inverted teal definition table">
+        <thead>
+          <tr><th></th>
+          <th>两周以内</th>
+          <th>两月月以内（不含两周内数据）</th>
+          <th>两月以上</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td>A</td>
+            <td>点击率>=0.1  转化率>0.1</td>
+            <td>转化率>0.2</td>
+            <td>acos<=0.6</td>
+          </tr>
+          <tr>
+            <td>B</td>
+            <td>点击率<=0.1  转化率>0.1</td>
+            <td>转化率<=0.2</td>
+            <td>acos>0.6</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>点击率>0.1  转化率<=0.1</td>
+            <td>转化率<=0.2</td>
+            <td>acos>0.6</td>
+          </tr>
+          <tr>
+            <td>D</td>
+            <td>点击率<0.1  转化率<=0.1</td>
+            <td>转化率<=0.2</td>
+            <td>acos>0.6</td>
+          </tr>
+      </tbody></table>
+
+
+      <button class="massive ui right floated button">
+      <a href="/">返回首页</a>
+    </button>
+
+
+
+</body>
+
+<script type="text/javascript" charset="utf-8"  src="../static/js/L2Dwidget.0.min.js"></script>
+<script type="text/javascript" charset="utf-8"  src="../static/js/L2Dwidget.min.js"></script>
+<script type="text/javascript">
+    L2Dwidget.init({"display": {
+        "superSample": 2,
+        "width": 200,
+        "height": 400,
+             "position": "right",
+                 "hOffset": 0,
+        "vOffset": 0
+          }
+     });
+</script>

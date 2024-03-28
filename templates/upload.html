@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>upload_emplyee</title>
+</head>
+<body>
+<div class="page-container">
+    <form  id="upload_form" action="/upload1/" method="POST"enctype="multipart/form-data">
+        {% csrf_token %}
+        <input id="upload" type="file" style="width: 50%" name="my_file" id="filename">
+        <button class="btn" type="button" onclick="Upload()">提交</button>
+    </form>
+</div>
+
+
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+function Upload() {
+    var fileInput = $('#upload').get(0).files[0];
+    console.info(fileInput);
+    if (fileInput) {
+        $("#upload_form").submit();
+    } else {
+        alert("请选择上传文件！");
+    }
+
+
+}
+
+</script>
+</body>
+</html>
+

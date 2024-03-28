@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="ui basic modal">
+        <div class="ui icon header">
+          <i class="positive thumbs up outline icon"></i>
+          Success Messages
+        </div>
+        <div class="content" align="center">
+          <p>{{ msg }}</p>
+        </div>
+        <div class="actions">
+          <div class="ui red basic cancel inverted button" onclick="history.back();">
+            <i class="remove icon"></i>
+            好的！
+          </div>
+          <div class="ui green ok inverted button" onclick="history.back();">
+            <i class="checkmark icon"></i>
+            知道了！
+          </div>
+        </div>
+      </div>
+    {{ msg }}
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/semantic.min.js' %}"></script>
+<script>
+    $('.ui.basic.modal')
+  .modal('show');
+</script>
+</html>
+
+
+

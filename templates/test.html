@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册界面</title>
+    <link rel="stylesheet" href="{% static 'css/styleRegist.css' %}" type="text/css" media="all">
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <div class="content">
+                <div class="switch">
+                    <h1 id="login">注册</h1>
+                </div>
+                <p class="hint">{{ hint }}</p>
+                <form action="/register/" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="backurl" value="{{ backurl }}">
+                    <div id="userName" class="input" aria-placeholder="用户名"><input type="text" name="username" required></div>
+                    <div id="password" class="input" aria-placeholder="密码"><input type="password" name="password" required></div>
+                    <div id='repassword' class="input" aria-placeholder="确认密码"><input type="password" name="repassword" required></div>
+                    <div id='name' class="input" aria-placeholder="姓名"><input type="text" name="name" required></div>
+                    <p>
+                        <a id="signUp" href="/" class="input">返回首页</a>
+                        <span>|</span>
+                        <a id="forget" href="/login/" class="input">返回登录</a>
+                    </p>
+                    <button class="button" type="submit">登录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+ 
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.js"></script>
+<script>
+ 
+    $('.input input').on('focus',function () {
+        $(this).parent().addClass('focus');
+    })
+ 
+    $('.input input').on('blur',function () {
+        if($(this).val() === '')
+            $(this).parent().removeClass('focus');
+    })
+
+ </script>
+</html>
